@@ -16,9 +16,10 @@ class Messages:
         handler = self.getHandle()
         handler_bytes = handler.to_bytes(4,byteorder='little')
         self.sock.sendall(lenBytes + handler_bytes + message)
-    def whiteMessage(self,message,user):
+    def whiteMessage(self,message,user,level,levelRequired):
         if user in self.whitelist.keys():
-            self.sendMessage(message)
+            if level >= levelRequired:
+                self.sendMessage(message)
         else:
             pass
     def listen(self,whom):
