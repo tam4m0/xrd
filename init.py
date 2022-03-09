@@ -1,16 +1,16 @@
-import socket, os, zipfile, requests, subprocess, time, stat, threading
+import socket, os, zipfile, requests, pathlib, stat, configparser
 from xmlrpc import client
-from messages import *
-
-class Constants:
-    Host = "127.0.0.1"
-    Port = 5000
-    SuperAdmin = ""
-    Prefix = "/"
+from phases import *
 
 class Core:
+    def serverExists(self):
+        for p in pathlib.Path(".").rglob("*"):
+            if p.name == "TrackmaniaServer":
+                return True
+        return False
+    
     def downloadServer(self):
-        print("It looks like you don't have the server downloaded. Would you like me to get it for you? (y/n) ", end="")
+        print("It looks like you don't have the server downloaded. Would you like me to get it for you? If it's in another location outside of the current directory, please type n here! (y/n) ", end="")
         while 1:
             i = input()
             if i == "y":
@@ -29,62 +29,14 @@ class Core:
                 print("Ok, I won't download the server. Since we have nothing, I am leaving now. Please refer to the docs.")
                 raise SystemExit
 
-    def startServer(self):
-        os.chdir("./server")
-        self.pPool.append(subprocess.Popen(["./TrackmaniaServer", "/dedicated_cfg=dedicated_cfg.txt", "/internet", "/game_settings=master.txt", "/nodaemon", "/verbose_rpc_full"]))
-        time.sleep(10)
-        os.chdir("..")
-
-    def phase1(self, host, port):
-        with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
-            s.connect((host,int(port)))
-            size = int.from_bytes(s.recv(4),'little')
-            if(s.recv(size) == "GBXRemote 2".encode()):
-                m = Messages(s,self.whitelist)
-                m.sendMessage(client.dumps(('SuperAdmin',Constants.SuperAdmin),methodname='Authenticate').encode())
-                m.sendMessage(client.dumps((True,),methodname='EnableCallbacks').encode())
-                m.sendMessage(client.dumps(("Hello from OpenTM!","",5),methodname="SendNotice").encode())
-                print("I got the server up and running.")
-                self.phase2(s,m)
-            else:
-                print("I failed to get the server up and running. Sorry about that, killing the program now.")
-                raise SystemExit
-                
-    def phase2(self, sock, messages):
-        messages.listeners[threading.get_native_id()] = []
-        while 1:
-            data,method = messages.listen(threading.get_native_id())
-            if method == "TrackMania.PlayerChat":
-                user,cmd,args = self.splitCmd(data,method,"CHAT")
-                if cmd == Constants.Prefix + "echo":
-                    messages.sendMessage(client.dumps((" ".join(args),user),methodname="ChatSendToLogin").encode())
-                if cmd == Constants.Prefix + "hacktheplanet":
-                    messages.sendMessage(client.dumps((user,"You've been arrested by the CIA for hacking, GG."),methodname="Kick").encode())
-                if cmd == Constants.Prefix + "ban":
-                    messages.whiteMessage(client.dumps((args[0],"The ban hammer has spoken!",True),methodname="BanAndBlackList").encode(),user)
-            
-    def splitCmd(self,data,method,typ):
-        if typ == "CHAT":
-            user = data[1]
-            command = data[2].split(" ")[0]
-            args = data[2][1:].split(" ")[1:]
-            return(user,command,args)
-    
     def __init__(self):
-        self.pPool = []
-        self.tPool = []
+        self.config = configparser.ConfigParser()
+        self.config.read("conf.ini")
 
-        self.whitelist = []
-        
-        with open("WHITELIST","r") as f:
-            for l in f:
-                self.whitelist.append(l)
-        
-        if not os.path.exists("./server"):
+        if not self.serverExists():
             self.downloadServer()
         else:
-            self.startServer()
-            self.phase1(Constants.Host,Constants.Port)
+            Phases(self.config)
 
 if __name__ == "__main__":
     Core()

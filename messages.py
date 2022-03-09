@@ -17,7 +17,7 @@ class Messages:
         handler_bytes = handler.to_bytes(4,byteorder='little')
         self.sock.sendall(lenBytes + handler_bytes + message)
     def whiteMessage(self,message,user):
-        if user in self.whitelist:
+        if user in self.whitelist.keys():
             self.sendMessage(message)
         else:
             pass
@@ -37,7 +37,6 @@ class Messages:
                 if d == None:
                     pass
                 else:
-                    print(d,m)
                     for l in self.listeners.keys():
                         self.listeners[l].append((d,m))
             except Exception as e:
