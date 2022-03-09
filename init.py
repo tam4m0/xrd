@@ -33,7 +33,7 @@ class Core:
         self.config = configparser.ConfigParser()
         self.config.read("conf.ini")
 
-        if not self.serverExists():
+        if not self.serverExists() or not self.config["Main"]["dejavu"] == "y":
             self.downloadServer()
         else:
             Phases(self.config)
