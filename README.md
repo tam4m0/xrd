@@ -12,10 +12,10 @@ xrd is a next-gen server controller for TrackMania Forever that is designed to b
 
 # Building
 
-xrd enjoys being made mostly out of stdlib code, so you do not need to install dependencies for the program itself to run (yet). <br/>
-However, if you do want to run the static build without downloading a release, you'll need to build it. <br/>
+xrd enjoys being made mostly out of stdlib code, but it uses quirks that only freezing the executable can provide. <br/>
+If you do want to run the static build without downloading a release, you'll need to build it. <br/>
 Just run GNU Make inside the git directory to produce a static build of xrd (provided you have pyinstaller and upx installed). <br/>
 
 # Running
 
-Just point a Python interpreter to `init.py` or point a command prompt to the PyInstaller executable.
+Point a command prompt to the PyInstaller executable. Easy as that, the plugins are built into the executable!
