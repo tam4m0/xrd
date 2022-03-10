@@ -48,9 +48,10 @@ class Phases:
             self.whitelist[p] = config["WhiteList"][p]
         self.config = config
         self.prefix = config["Main"]["prefix"]
+        self.hostPort = [config['HostPort']['host'], int(self.config['HostPort']['port'])]
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect(
-                (self.config["HostPort"]["host"], int(self.config["HostPort"]["port"]))
+                (self.hostPort[0], self.hostPort[1])
             )
             size = int.from_bytes(s.recv(4), "little")
             if s.recv(size) == "GBXRemote 2".encode():
@@ -69,11 +70,11 @@ class Phases:
                         ("Hello from xrd!", "", 5), methodname="SendNotice"
                     ).encode()
                 )
-                print("INFO [cn]: I got the connection up and running.")
+                print(f"INFO [cn]: I got the connection up and running. (Attached to {self.hostPort[0]}:{self.hostPort[1]})")
                 self.loop(s, m)
             else:
                 print(
-                    "INFO [dc]: I failed to get the connection up and running. Sorry about that, killing the controller now."
+                    f"INFO [dc]: I failed to get the connection to {self.hostPort[0]}:{self.hostPort[1]}. Sorry about that, killing the controller now."
                 )
                 raise SystemExit
 
