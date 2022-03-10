@@ -27,6 +27,12 @@ class Phases:
             data,method = messages.listen(threading.get_native_id())
             if self.config["Main"]["debug"] == "y":
                 print("DEBUG [dm]:",data,method)
+            if method == "TrackMania.PlayerConnect":
+                user,spec = self.splitCmd(data,method,"CONN")
+                print("CONN [co]:",user+(", a spectator," if spec == True else ""),"joined.")
+            if method == "TrackMania.PlayerFinish":
+                login,timescore = self.splitCmd(data,method,"PEND")
+                print("PEND [pe]:",user,"finished with a time of",timescore,"!")
             if method == "TrackMania.PlayerChat":
                 user,cmd,args = self.splitCmd(data,method,"CHAT")
                 if cmd == self.config["Main"]["prefix"] + "echo":
@@ -80,6 +86,14 @@ class Phases:
             command = data[2].split(" ")[0]
             args = data[2][1:].split(" ")[1:]
             return(user,command,args)
+        if typ == "CONN":
+            login = data[0]
+            spec = data[1]
+            return(login,spec)
+        if typ == "PEND":
+            login = data[1]
+            timescore = data[2]
+            return(login,timescore)
 
     def getLevel(self,levelStr):
         if levelStr == "MasterAdmin":
