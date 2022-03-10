@@ -18,8 +18,8 @@ class MessageGenerators:
     def splitCmd(data, method, typ):
         if typ == "CHAT":
             user = data[1]
-            command = data[2].split(" ")[0]
-            args = data[2][1:].split(" ")[1:]
+            command = data[2].split()[0]
+            args = data[2][1:].split()[1:]
             return (user, command, args)
         if typ == "CONN":
             login = data[0]
