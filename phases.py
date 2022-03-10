@@ -97,32 +97,6 @@ class Phases:
                     user + (", a spectator," if spec == True else ""),
                     "joined.",
                 )
-            if method == "TrackMania.PlayerFinish":
-                login, timescore = MessageGenerators.splitCmd(data, method, "PEND")
-                if timescore == 0:
-                    pass
-                else:
-                    print(
-                        "PEND [pe]:",
-                        login,
-                        "finished with a time of",
-                        MessageGenerators.timestrToHMS(timescore) + "!",
-                    )
-            if method == "TrackMania.PlayerCheckpoint":
-                login, timescore, lap, cpindex = MessageGenerators.splitCmd(
-                    data, method, "PCHP"
-                )
-                if timescore == 0:
-                    pass
-                else:
-                    print(
-                        "PCHP [pc]:",
-                        login,
-                        "reached CP",
-                        cpindex,
-                        "at time",
-                        MessageGenerators.timestrToHMS(timescore) + "!",
-                    )
             if method == "TrackMania.PlayerChat":
                 user, cmd, args = MessageGenerators.splitCmd(data, method, "CHAT")
                 if cmd == self.prefix + "echo":
