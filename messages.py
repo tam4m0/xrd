@@ -1,6 +1,7 @@
 import threading, socket
 from xmlrpc import client
 from struct import unpack_from
+from enums import *
 
 class Messages:
     def getHandle(self):
@@ -18,7 +19,7 @@ class Messages:
         self.sock.sendall(lenBytes + handler_bytes + message)
     def whiteMessage(self,message,user,level,levelRequired):
         if user in self.whitelist.keys():
-            if level >= levelRequired:
+            if level.value >= levelRequired.value:
                 self.sendMessage(message)
         else:
             pass

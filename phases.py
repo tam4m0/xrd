@@ -9,6 +9,7 @@ class Phases:
         for p in config["WhiteList"]:
             self.whitelist[p] = config["WhiteList"][p]
         self.config = config
+        self.prefix = config["Main"]["prefix"]
         with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
             s.connect((self.config["HostPort"]["host"],int(self.config["HostPort"]["port"])))
             size = int.from_bytes(s.recv(4),'little')
@@ -34,33 +35,39 @@ class Phases:
                 print("CONN [co]:",user+(", a spectator," if spec == True else ""),"joined.")
             if method == "TrackMania.PlayerFinish":
                 login,timescore = MessageGenerators.splitCmd(data,method,"PEND")
-                print("PEND [pe]:",user,"finished with a time of",timescore,"!")
+                if timescore == 0:
+                    pass
+                else:
+                    print("PEND [pe]:",login,"finished with a time of",MessageGenerators.timestrToHMS(timescore)+"!")
             if method == "TrackMania.PlayerCheckpoint":
                 login,timescore,lap,cpindex = MessageGenerators.splitCmd(data,method,"PCHP")
-                print("PCHP [pc]:",user,"reached CP",cpindex,"at time",timescore,"!")
+                if timescore == 0:
+                    pass
+                else:
+                    print("PCHP [pc]:",login,"reached CP",cpindex,"at time",MessageGenerators.timestrToHMS(timescore)+"!")
             if method == "TrackMania.PlayerChat":
                 user,cmd,args = MessageGenerators.splitCmd(data,method,"CHAT")
-                if cmd == self.config["Main"]["prefix"] + "echo":
+                if cmd == self.prefix + "echo":
                     c.echo(user,cmd,args)
-                if cmd == self.config["Main"]["prefix"] + "hacktheplanet":
+                if cmd == self.prefix + "hacktheplanet":
                     c.hacktheplanet(user,cmd,args)
-                if cmd == self.config["Main"]["prefix"] + "ban":
+                if cmd == self.prefix + "ban":
                     c.ban(user,cmd,args)
-                if cmd == self.config["Main"]["prefix"] + "unban":
+                if cmd == self.prefix + "unban":
                     c.unban(user,cmd,args)
-                if cmd == self.config["Main"]["prefix"] + "kick":
+                if cmd == self.prefix + "kick":
                     c.kick(user,cmd,args)
-                if cmd == self.config["Main"]["prefix"] + "mute":
+                if cmd == self.prefix + "mute":
                     c.mute(user,cmd,args)
-                if cmd == self.config["Main"]["prefix"] + "unmute":
+                if cmd == self.prefix + "unmute":
                     c.unmute(user,cmd,args)
-                if cmd == self.config["Main"]["prefix"] + "forceskip":
+                if cmd == self.prefix + "forceskip":
                     c.forceskip(user,cmd,args)
-                if cmd == self.config["Main"]["prefix"] + "forcerestart":
+                if cmd == self.prefix + "forcerestart":
                     c.forcerestart(user,cmd,args)
-                if cmd == self.config["Main"]["prefix"] + "delchall":
+                if cmd == self.prefix + "delchall":
                     c.delchall(user,cmd,args)
-                if cmd == self.config["Main"]["prefix"] + "updchalls":
+                if cmd == self.prefix + "updchalls":
                     c.updchalls(user,cmd,args)
-                if cmd == self.config["Main"]["prefix"] + "getchalls":
+                if cmd == self.prefix + "getchalls":
                     c.getchalls(user,cmd,args)

@@ -1,5 +1,7 @@
+from math import floor
+
 class MessageGenerators:
-    def splitCmd(self,data,method,typ):
+    def splitCmd(data,method,typ):
         if typ == "CHAT":
             user = data[1]
             command = data[2].split(" ")[0]
@@ -20,10 +22,10 @@ class MessageGenerators:
             cpindex = data[4]
             return(login,timescore,lap,cpindex)
 
-    def getLevel(self,levelStr):
-        if levelStr == "MasterAdmin":
-            return 9
-        elif levelStr == "Operator":
-            return 8
-        elif levelStr == "Moderator":
-            return 7
+    def timestrToHMS(timestr):
+        s = int(timestr)/1000
+        m = s/60
+        s %= 60
+        h = m/60
+        m %= 60
+        return str(floor(h))+"h"+str(floor(m))+"m"+str(round(s,2))+"s"
