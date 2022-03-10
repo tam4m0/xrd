@@ -68,3 +68,9 @@ jobs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
+      
+    - name: coverage.py badge
+      uses: tj-actions/coverage-badge-py@v1.6
+      with:
+        output: cov.svg
+        overwrite: true
