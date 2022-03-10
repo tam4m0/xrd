@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 for p in *.py; do
     black $p;
