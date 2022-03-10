@@ -1,4 +1,4 @@
-import socket
+import socket, os
 from messages import *
 
 class Phases:
@@ -15,17 +15,18 @@ class Phases:
                 m.sendMessage(client.dumps(('SuperAdmin',config["Main"]["superadmin"]),methodname='Authenticate').encode())
                 m.sendMessage(client.dumps((True,),methodname='EnableCallbacks').encode())
                 m.sendMessage(client.dumps(("Hello from OpenTM!","",5),methodname="SendNotice").encode())
-                print("I got the connection up and running.")
+                print("INFO [cn]: I got the connection up and running.")
                 self.loop(s,m)
             else:
-                print("I failed to get the connection up and running. Sorry about that, killing the controller now.")
+                print("INFO [dc]: I failed to get the connection up and running. Sorry about that, killing the controller now.")
                 raise SystemExit
                 
     def loop(self, sock, messages):
         messages.listeners[threading.get_native_id()] = []
         while 1:
             data,method = messages.listen(threading.get_native_id())
-            print(data,method)
+            if self.config["Main"]["debug"] == "y":
+                print("DEBUG [dm]:",data,method)
             if method == "TrackMania.PlayerChat":
                 user,cmd,args = self.splitCmd(data,method,"CHAT")
                 if cmd == self.config["Main"]["prefix"] + "echo":
@@ -50,9 +51,28 @@ class Phases:
                 if cmd == self.config["Main"]["prefix"] + "delchall":
                     messages.whiteMessage(client.dumps((args[0],),methodname="RemoveChallenge").encode(),user,self.getLevel(self.config["WhiteList"][user]),self.getLevel("Operator"))
                 if cmd == self.config["Main"]["prefix"] + "updchalls":
-                    pass
+                    try:
+                        if user in self.whitelist.keys():
+                            if self.getLevel(self.config["WhiteList"][user]) >= self.getLevel("Operator"):
+                                if os.path.exists(self.config["Main"]["tracksfolder"]):
+                                    for r,d,f in os.walk(self.config["Main"]["tracksfolder"]):
+                                        for n in f:
+                                            if self.config["Main"]["debug"] == "y":
+                                                print("DEBUG [tr]:",n)
+                                else:
+                                    messages.sendMessage(client.dumps(("There is no tracksfolder defined in the configuration. Please try again after defining this and restarting the server controller.",user),methodname="ChatSendToLogin").encode())
+                    except Exception as e:
+                        messages.sendMessage(client.dumps(("Unknown error occurred. Please try again.",user),methodname="ChatSendToLogin").encode())
                 if cmd == self.config["Main"]["prefix"] + "getchalls":
-                    pass
+                    try:
+                        if os.path.exists(self.config["Main"]["tracksfolder"]):
+                            for r,d,f in os.walk(self.config["Main"]["tracksfolder"]):
+                                for n in f:
+                                    messages.sendMessage(client.dumps((n,),methodname="ChatSendToLogin").encode())
+                        else:
+                            messages.sendMessage(client.dumps(("There is no tracksfolder defined in the configuration. Please try again after defining this and restarting the server controller.",user),methodname="ChatSendToLogin").encode())
+                    except Exception as e:
+                        messages.sendMessage(client.dumps(("Unknown error occurred. Please try again.",user),methodname="ChatSendToLogin").encode())
 
     def splitCmd(self,data,method,typ):
         if typ == "CHAT":

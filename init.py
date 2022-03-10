@@ -10,7 +10,7 @@ class Core:
         return False
     
     def downloadServer(self):
-        print("It looks like you don't have the server downloaded. Would you like me to get it for you? If it's in another location outside of the current directory, please type n here! (y/n) ", end="")
+        print("It looks like you don't have the server downloaded. Would you like me to get it for you? Please refer to the docs if you have a custom server location. (y/n) ", end="")
         while 1:
             i = input()
             if i == "y":
@@ -34,10 +34,16 @@ class Core:
         self.config.read("conf.ini")
 
         if self.config["Main"]["dejavu"] == "y":
+            if self.config["Main"]["debug"] == "y":
+                print("DEBUG [de]: Deja vu enabled")
             Phases(self.config)
         elif not self.serverExists():
+            if self.config["Main"]["debug"] == "y":
+                print("DEBUG [do]: And thus God said, let there be a download prompt")
             self.downloadServer()
         else:
+            if self.config["Main"]["debug"] == "y":
+                print("DEBUG [la]: Launching server")
             Phases(self.config)
 
 if __name__ == "__main__":
