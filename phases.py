@@ -1,7 +1,9 @@
-import socket, os
-from messages import *
-from messagegen import *
+import os
+import socket
+
 from cmds import *
+from messagegen import *
+from messages import *
 
 
 class Phases:

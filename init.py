@@ -1,5 +1,13 @@
-import socket, os, zipfile, requests, pathlib, stat, configparser
+import configparser
+import os
+import pathlib
+import socket
+import stat
+import zipfile
 from xmlrpc import client
+
+import requests
+
 from phases import *
 
 

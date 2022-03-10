@@ -1,7 +1,10 @@
-import threading, os, socket
+import os
+import socket
+import threading
+
+from enums import *
 from messagegen import *
 from messages import *
-from enums import *
 
 
 class Commands:

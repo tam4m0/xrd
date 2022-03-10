@@ -1,6 +1,8 @@
-import threading, socket
-from xmlrpc import client
+import socket
+import threading
 from struct import unpack_from
+from xmlrpc import client
+
 from enums import *
 
 
