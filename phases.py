@@ -43,6 +43,16 @@ class Phases:
                     messages.whiteMessage(client.dumps((args[0],),methodname="Ignore").encode(),user,self.getLevel(self.config["WhiteList"][user]),self.getLevel("Moderator"))
                 if cmd == self.config["Main"]["prefix"] + "unmute":
                     messages.whiteMessage(client.dumps((args[0],),methodname="UnIgnore").encode(),user,self.getLevel(self.config["WhiteList"][user]),self.getLevel("Moderator"))
+                if cmd == self.config["Main"]["prefix"] + "forceskip":
+                    messages.whiteMessage(client.dumps(tuple(),methodname="NextChallenge").encode(),user,self.getLevel(self.config["WhiteList"][user]),self.getLevel("Moderator"))
+                if cmd == self.config["Main"]["prefix"] + "forcerestart":
+                    messages.whiteMessage(client.dumps(tuple(),methodname="RestartChallenge").encode(),user,self.getLevel(self.config["WhiteList"][user]),self.getLevel("Moderator"))
+                if cmd == self.config["Main"]["prefix"] + "delchall":
+                    messages.whiteMessage(client.dumps((args[0],),methodname="RemoveChallenge").encode(),user,self.getLevel(self.config["WhiteList"][user]),self.getLevel("Operator"))
+                if cmd == self.config["Main"]["prefix"] + "updchalls":
+                    pass
+                if cmd == self.config["Main"]["prefix"] + "getchalls":
+                    pass
 
     def splitCmd(self,data,method,typ):
         if typ == "CHAT":
