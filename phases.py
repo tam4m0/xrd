@@ -125,3 +125,5 @@ class Phases:
                     c.getchalls(user, cmd, args)
                 if cmd == self.prefix + "help":
                     c.xhelp(user, cmd, args)
+                if cmd == self.prefix + "updplugins":
+                    c.updplugins(user, cmd, args)

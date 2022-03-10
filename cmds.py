@@ -13,6 +13,7 @@
 
 import os
 import socket
+import subprocess
 import threading
 from inspect import getdoc
 
@@ -219,6 +220,24 @@ class Commands:
                                 methodname="ChatSendToLogin",
                             ).encode()
                         )
+        except Exception as e:
+            self.messages.sendMessage(
+                client.dumps(
+                    ("Unknown error occurred. Please try again.", user),
+                    methodname="ChatSendToLogin",
+                ).encode()
+            )
+
+    def updplugins(self, user, cmd, args):
+        """Updates all plugins in the plugins directory, rebuilding the program and halting it. Only available to MasterAdmin and above."""
+        try:
+            if user in self.whitelist.keys():
+                if self.config["WhiteList"][user] >= PowerLevels.MasterAdmin:
+                    os.chdir(self.config["Plugins"]["workdir"])
+                    p = subprocess.Popen(("make"))
+                    p.wait()
+                    print("INFO [mc]: Rebuild completed, halting server...")
+                    raise SystemExit
         except Exception as e:
             self.messages.sendMessage(
                 client.dumps(

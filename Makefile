@@ -1,4 +1,7 @@
-all: format pyinstaller rename last
+all: writeworkdir format pyinstaller rename last
+
+writeworkdir:
+	python Makefile.py
 
 format:
 	black *.py
