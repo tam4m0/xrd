@@ -17,7 +17,7 @@ class Phases:
                 m = Messages(s,self.whitelist)
                 m.sendMessage(client.dumps(('SuperAdmin',config["Main"]["superadmin"]),methodname='Authenticate').encode())
                 m.sendMessage(client.dumps((True,),methodname='EnableCallbacks').encode())
-                m.sendMessage(client.dumps(("Hello from OpenTM!","",5),methodname="SendNotice").encode())
+                m.sendMessage(client.dumps(("Hello from xrd!","",5),methodname="SendNotice").encode())
                 print("INFO [cn]: I got the connection up and running.")
                 self.loop(s,m)
             else:
