@@ -5,6 +5,24 @@ from cmds import *
 
 class Phases:
     def __init__(self, config):
+        print('''
+     ,..........         ...........    
+     .':cccccc:;.       .;ccccccc:,.    
+       .;ccccccc:'.    .;:cc:::::'.     
+        .;ccccccc:'.  .:cclcccc;.       
+         .,::::::::;,;ccccllol:.        
+           .;cccccccccccldxkxc.         
+            .:looolllodxkOOd:.          
+            .;dOOkkkkOOOOko;.           
+            .cxkOOOOOOkxo:,'.           
+           .;llllodddoc;,.....          
+         .,okOOko:;,....,;codl,.        
+        .;x0KKK0Od;. ..cdkO0K0d;.       
+       .;d0K0K00kc.   .ck000KK0x:..     
+      /:d0KKK00x;.     .;x00KKK0Oxl\    
+    .;ldxkkkkxo,         ,oxkkkkkkxl,   
+     ..........           ..........  
+                           xrd v0.1.0''')
         self.whitelist = {}
         for p in config["WhiteList"]:
             self.whitelist[p] = config["WhiteList"][p]
