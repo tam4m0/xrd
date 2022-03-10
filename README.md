@@ -7,3 +7,13 @@ xrd is a next-gen server controller for TrackMania Forever that is designed to b
   <img src="https://discordapp.com/api/guilds/951272271266344960/widget.png?style=shield"/>
 </a>
 <img src="https://i.arxius.io/8c526630.png"/>
+
+# Building
+
+xrd enjoys being made mostly out of stdlib code. However, there are some packages you must install on your end (if you are building from source) to get it running.
+These are:
+  - pluginlib
+
+# Running
+
+Just point a Python interpreter to `init.py` or point a command prompt to the PyInstaller executable.
