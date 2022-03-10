@@ -10,9 +10,7 @@ xrd is a next-gen server controller for TrackMania Forever that is designed to b
 
 # Building
 
-xrd enjoys being made mostly out of stdlib code. However, there are some packages you must install on your end (if you are building from source) to get it running.
-These are:
-  - pluginlib
+xrd enjoys being made mostly out of stdlib code, so you do not need to install dependencies (yet).
 
 # Running
 
