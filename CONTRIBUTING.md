@@ -13,3 +13,5 @@
     - Code at least half-decently, and the formatter will take care of it for you.
 
     - Remember your origin. You came here looking to contribute to something, and now look where you are.
+    
+    - Move fast and break things. You can clean them up later.
