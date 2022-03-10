@@ -17,6 +17,7 @@ import socket
 from cmds import *
 from messagegen import *
 from messages import *
+from pluginsutil import PluginsUtil
 
 
 class Phases:
@@ -74,6 +75,8 @@ class Phases:
                 print(
                     f"INFO [cn]: I got the connection up and running. (Attached to {self.hostPort[0]}:{self.hostPort[1]})"
                 )
+                pu = PluginsUtil(self.config)
+                pu.registerAllListeners(s, m)
                 self.loop(s, m)
             else:
                 print(
