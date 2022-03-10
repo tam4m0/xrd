@@ -20,4 +20,4 @@ Just run GNU Make inside the git directory to produce a static build of xrd (pro
 
 Point a command prompt to the PyInstaller executable. Easy as that, the plugins are built into the executable!
 
-**But how do I add new plugins?** Simply use the /updplugins command, making sure you are MasterAdmin. Be warned though, *it will stop the server, so make sure you're running it on a repeater script!*
+**But how do I add new plugins?** Simply use the /updplugins command, making sure you are MasterAdmin. Be warned though, *it will stop the server controller, so make sure you're running it on a repeater script!*
