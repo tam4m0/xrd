@@ -33,6 +33,9 @@ class Phases:
             if method == "TrackMania.PlayerFinish":
                 login,timescore = self.splitCmd(data,method,"PEND")
                 print("PEND [pe]:",user,"finished with a time of",timescore,"!")
+            if method == "TrackMania.PlayerCheckpoint":
+                login,timescore,lap,cpindex = self.splitCmd(data,method,"PCHP")
+                print("PCHP [pc]:",user,"reached CP",cpindex,"at time",timescore,"!")
             if method == "TrackMania.PlayerChat":
                 user,cmd,args = self.splitCmd(data,method,"CHAT")
                 if cmd == self.config["Main"]["prefix"] + "echo":
@@ -94,6 +97,12 @@ class Phases:
             login = data[1]
             timescore = data[2]
             return(login,timescore)
+        if typ == "PCHP":
+            login = data[1]
+            timescore = data[2]
+            lap = data[3]
+            cpindex = data[4]
+            return(login,timescore,lap,cpindex)
 
     def getLevel(self,levelStr):
         if levelStr == "MasterAdmin":
