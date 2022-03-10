@@ -7,17 +7,14 @@ import importlib
 #
 # follow the rest of these comments and you'll be on your way
 #
-# import plugins here
+# import plugins here and set the same thing in conf.ini
 import sectorum
 
 
 class PluginsUtil:
     def __init__(self, config):
         self.config = config
-        self.plugins = [
-            # and set them to load automatically here
-            "sectorum",
-        ]
+        self.plugins = [x for x in self.config["Plugins"]["list"].split(":")]
 
     def registerAllListeners(self, socket, messagesInstance):
         for pkg in self.plugins:
