@@ -4,7 +4,7 @@
 block_cipher = None
 
 
-a = Analysis(['cmds.py', 'sectorum.py', 'pluginsutil.py', 'enums.py', 'init.py', 'messagegen.py', 'messages.py', 'phases.py'],
+a = Analysis(['cmds.py', './plugins/sectorum.py', 'pluginsutil.py', 'enums.py', 'init.py', 'messagegen.py', 'messages.py', 'phases.py'],
              pathex=[],
              binaries=[],
              datas=[],
