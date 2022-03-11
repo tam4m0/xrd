@@ -6,9 +6,7 @@ import threading
 #
 # put plugins in ./plugins folder, add them to Makefile.spec, run make
 #
-# import plugins here and set the same thing in conf.ini
-import sectorum
-
+# import plugins in conf.ini
 
 class PluginsUtil:
     def __init__(self, config):
@@ -24,6 +22,13 @@ class PluginsUtil:
             t.start()
 
     def spinOffThreadToInstance(self, pkgname, socket, messagesInstance):
+        exec(
+            compile(
+                ast.parse("import " + pkgname),
+                filename="",
+                mode="exec",
+            )
+        )
         exec(
             compile(
                 ast.parse(pkgname + ".Main(socket, messagesInstance, self.config)"),
