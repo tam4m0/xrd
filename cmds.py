@@ -11,11 +11,15 @@
 # You should have received a copy of the GNU General Public License along with xrd.
 # If not, see <https://www.gnu.org/licenses/>.
 
+import ast
 import os
+import pathlib
 import socket
 import subprocess
 import threading
 from inspect import getdoc
+
+import sectorum
 
 from enums import *
 from messagegen import *
@@ -62,17 +66,19 @@ class Commands:
                 getdoc(self.updchalls),
                 " /getchalls:",
                 getdoc(self.getchalls),
+                " /updplugins:",
+                getdoc(self.updplugins),
             ],
         ]
         try:
             if int(args[0]) == 0:
-                args[0] = 0
+                args[0] = 1
             for ds in docs[int(args[0]) - 1]:
                 self.messages.sendMessage(
                     client.dumps((ds, user), methodname="ChatSendToLogin").encode()
                 )
         except IndexError as e:
-            args = [0]
+            args = [1]
             self.xhelp(user, cmd, args)
 
     def echo(self, user, cmd, args):
@@ -205,4 +211,4 @@ class Commands:
                 p = subprocess.Popen(("make"))
                 p.wait()
                 print("INFO [mc]: Rebuild completed, halting server...")
-                os._exit()
+                os._exit(0)

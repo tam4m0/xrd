@@ -40,7 +40,7 @@ class Phases:
       /:d0KKK00x;.     .;x00KKK0Oxl\    
     .;ldxkkkkxo,         ,oxkkkkkkxl,   
      ..........           ..........  
-                           xrd v0.1.0
+                           xrd v0.1.2
 
 """
         )

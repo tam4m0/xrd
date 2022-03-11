@@ -11,6 +11,10 @@
 # You should have received a copy of the GNU General Public License along with xrd.
 # If not, see <https://www.gnu.org/licenses/>.
 
+import sys
+
+sys.path.append("./plugins")
+
 import configparser
 import os
 import pathlib
