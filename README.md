@@ -18,8 +18,4 @@ Just run GNU Make inside the git directory to produce a static build of xrd (pro
 
 # Running
 
-1) Point a Python interpreter to `init.py`.
-
-2) ...or point a command prompt to the PyInstaller executable. Easy as that, the plugins are built into the executable!
-
-/updplugins is only usable if you have kept the git directory, have `make`d the program before, and are running inside of the `dist` folder. It's sort of an afterthought...
+Either run the PyInstaller executable from the Releases page, which contains all plugins built-in, or "roll-your-own" by pointing a Python interpreter to `init.py`.
