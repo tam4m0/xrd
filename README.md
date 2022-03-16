@@ -19,3 +19,5 @@ Just run GNU Make inside the git directory to produce a static build of xrd (pro
 # Running
 
 Either run the PyInstaller executable from the Releases page, which contains all plugins built-in, or "roll-your-own" by pointing a Python interpreter to `init.py`.
+
+Testing guilded webhook
