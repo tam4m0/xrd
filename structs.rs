@@ -1,7 +1,5 @@
 extern crate serde;
 use serde_derive::*;
-use serde::*;
-use serde::ser::*;
 
 #[derive(Deserialize)]
 pub struct Config {
@@ -12,6 +10,7 @@ pub struct Config {
 #[derive(Deserialize)]
 pub struct Main {
         pub version: String,
+	pub prefix: String,
 }
 
 #[derive(Deserialize)]
