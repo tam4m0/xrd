@@ -18,5 +18,6 @@ pub struct Server {
         pub host: String,
         pub port: String,
         pub password: String,
+	pub admins: String,
 }
 

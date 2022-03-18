@@ -4,6 +4,7 @@
 extern crate toml;
 use std::net::TcpStream;
 use std::io::prelude::*;
+use std::sync::{Arc,Mutex};
 use std::fs;
 use std::str;
 use std::env;
@@ -12,13 +13,16 @@ pub mod structs;
 pub mod messages;
 pub mod loops;
 
-fn connect_server(cnfroot: &structs::Config, handler: u32) -> (TcpStream,u32) {
-	let mut stream = TcpStream::connect(format!("{}:{}",&cnfroot.server.host,&cnfroot.server.port)).unwrap();
+fn connect_server(cnfroot: &structs::Config, handler: u32) -> (Arc<Mutex<TcpStream>>,u32) {
+	let stream = Arc::new(Mutex::new(TcpStream::connect(format!("{}:{}",&cnfroot.server.host,&cnfroot.server.port)).unwrap()));
 
-	stream.read(&mut [0;4]).unwrap();
+	let mut cloned_stream = stream.lock().unwrap();
+	cloned_stream.read(&mut [0;4]).unwrap();
 
 	let mut ver = [0;12];
-	stream.read(&mut ver).unwrap();
+	cloned_stream.read(&mut ver).unwrap();
+
+	drop(cloned_stream);
 
 	assert_eq!(str::from_utf8(&ver).unwrap().trim_matches(char::from(0)),"GBXRemote 2");
 	println!("Connection acquired to server.");

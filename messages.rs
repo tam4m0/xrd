@@ -1,6 +1,7 @@
 use byteorder::{ByteOrder,LittleEndian};
 use std::str;
 use std::net::TcpStream;
+use std::sync::{Arc,Mutex};
 use std::io::prelude::*;
 use aho_corasick::AhoCorasick;
 #[path="./structs.rs"]
@@ -10,21 +11,20 @@ pub fn reverse_xmlrpc(message: String) -> (String,Vec<String>) {
 	let xmllist = message.split("\n").collect::<Vec<&str>>();
 	let ac_types = AhoCorasick::new_auto_configured(&["<string>","<boolean>","<i4>"]);
 	let ac_endtypes = AhoCorasick::new_auto_configured(&["</string>","</boolean>","</i4>"]);
-	let ac_methods = AhoCorasick::new_auto_configured(&["TrackMania.PlayerConnect","TrackMania.PlayerDisconnect","TrackMania.PlayerChat"]);
 	let mut methodName = String::new();
 	let mut argv = Vec::new();
 	if xmllist[0].starts_with("<?xml") {
 		if xmllist[1].starts_with("<methodCall>") {
 			for x in &xmllist[2..] {
 				if x.starts_with("<methodName>") {
-					let mat = ac_methods.find(x).unwrap();
-					methodName.push_str(&x[mat.start()..mat.end()]);
-				}
-				if x.starts_with("<params>") { continue; }
+					methodName.push_str(&x[x.find(">").unwrap()+1..x.rfind("<").unwrap()]);
+				} if x.starts_with("<params>") { continue; }
 				if x.starts_with("<param><value>") {
-					let mat = ac_types.find(x).unwrap();
-					let mat2 = ac_endtypes.find(x).unwrap();
-					argv.push(String::from(&x[mat.end()..mat2.start()]));
+					if !x.contains("struct") {
+						let mat = ac_types.find(x).unwrap();
+						let mat2 = ac_endtypes.find(x).unwrap();
+						argv.push(String::from(&x[mat.end()..mat2.start()]));
+					}
 				}
 			}
 		} else { return (String::from("Invalid XML-RPC"),vec![String::from("Invalid XML-RPC")]); }	
@@ -51,7 +51,7 @@ pub fn transform_xmlrpc(lang: String) -> String {
 					langstr.push_str("<param><value>");
 					if ac.is_match(x[2]) {
 						if x[2] == "str" {
-							langstr.push_str(&format!("<string>{}</string>",x[3])[..]);
+							langstr.push_str(&format!("<string>{}</string>",if &x[3..].len() == &usize::from(1u8) { vec![x[3]].join(" ") } else { x[3..].iter().map(|x| String::from(*x)).collect::<Vec<String>>().join(" ") })[..]);
 						} else if x[2] == "bool" {
 							langstr.push_str(&format!("<boolean>{}</boolean>",if x[3] == "true" { "1" } else { "0" })[..]);
 						} else {
@@ -68,30 +68,34 @@ pub fn transform_xmlrpc(lang: String) -> String {
 }
 
 
-pub fn send_message(str: String, mut stream: TcpStream, mut handler: u32) -> Result<(TcpStream,u32),()> {
+pub fn send_message(str: String, stream: Arc<Mutex<TcpStream>>, mut handler: u32) -> Result<(Arc<Mutex<TcpStream>>,u32),()> {
+	let cloned_stream = Arc::clone(&stream);
+	let mut cloned_stream_unlocked = cloned_stream.lock().unwrap();
         let mut handler_bytes = [0;4];
-        let mut len_bytes = [0;4];
+	let mut len_bytes = [0;4];
         if handler + 1 == 0xFFFFFFFF { handler = 0x80000000; } else { handler += 1; }
-        LittleEndian::write_u32(&mut handler_bytes, handler);
-        LittleEndian::write_u32(&mut len_bytes, *&str.as_bytes().len() as u32);
-        let a = stream.write(&len_bytes);
-        let b = stream.write(&handler_bytes);
-        let c = stream.write(&str.as_bytes());
-        for x in [a,b,c].iter() {
-                if !x.is_ok() {
-                        return Err(());
-                }
-        }
-        Ok((stream,handler))
+       	LittleEndian::write_u32(&mut handler_bytes, handler);
+      	LittleEndian::write_u32(&mut len_bytes, *&str.as_bytes().len() as u32);
+	let a = cloned_stream_unlocked.write(&len_bytes);
+	let b = cloned_stream_unlocked.write(&handler_bytes);
+	let c = cloned_stream_unlocked.write(&str.as_bytes());
+	for x in [a,b,c].iter() {
+	        if !x.is_ok() {
+	                return Err(());
+	        }
+	}
+	drop(cloned_stream_unlocked);
+	Ok((stream,handler))
 }
 
-pub fn listen(mut socket: TcpStream) -> Result<String,()> {
+pub fn listen(socket: Arc<Mutex<TcpStream>>) -> String {
+	let cloned_sock = Arc::clone(&socket);
+	let mut cloned_sock_unlocked = cloned_sock.lock().unwrap();
 	loop {
 		let mut buf = [0;1024];
 		loop {
 			buf = [0;1024];
-			let res = socket.read(&mut buf);
-			if !res.is_ok() { return Err(()); }
+			cloned_sock_unlocked.read(&mut buf).unwrap();
 			if buf.is_empty() { continue; }
 			if str::from_utf8(&buf).is_ok() { break; } else { continue; }
 		}
@@ -99,6 +103,7 @@ pub fn listen(mut socket: TcpStream) -> Result<String,()> {
 		let xmlstart = str.find("<?xml");
 		if !xmlstart.is_some() { continue; }
 		let str = str::from_utf8(&str.as_bytes()[xmlstart.unwrap() as usize..]);
-		return Ok(String::from(str.unwrap()));
+		drop(cloned_sock_unlocked);
+		return String::from(str.unwrap());
 	}
 }
