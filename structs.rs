@@ -22,5 +22,6 @@ pub struct Server {
         pub password: String,
 	pub admins: String,
 	pub trackspath: String,
+	pub gametype: String,
 }
 

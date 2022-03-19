@@ -1,10 +1,11 @@
 [main]
-version = "0.2.0"
+version = "0.2.0 'Cowboys from Hell'"
 prefix = "/"
 
 [server]
 host = "127.0.0.1"
 port = "5000"
-password = ""
+password = "SuperAdmin"
 trackspath = ""
 admins = ""
+gametype = ""

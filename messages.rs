@@ -7,26 +7,26 @@ use aho_corasick::AhoCorasick;
 #[path="./structs.rs"]
 pub mod structs;
 
-pub fn reverse_xmlrpc(message: String) -> (String,Vec<String>) {
+pub fn reverse_xmlrpc(message: &String) -> (String,Vec<String>) {
 	let xmllist = message.split("\n").collect::<Vec<&str>>();
-	let ac_types = AhoCorasick::new_auto_configured(&["<string>","<boolean>","<i4>"]);
-	let ac_endtypes = AhoCorasick::new_auto_configured(&["</string>","</boolean>","</i4>"]);
+	let ac_types = AhoCorasick::new_auto_configured(&["<string>","<boolean>","<i4>","<struct>"]);
+	let ac_endtypes = AhoCorasick::new_auto_configured(&["</string>","</boolean>","</i4>","</struct>"]);
 	let mut methodName = String::new();
 	let mut argv = Vec::new();
 	if xmllist[0].starts_with("<?xml") {
-		if xmllist[1].starts_with("<methodCall>") {
+		if xmllist[1].starts_with("<methodCall>") || xmllist[1].starts_with("<methodResponse>") {
 			for x in &xmllist[2..] {
 				if x.starts_with("<methodName>") {
 					methodName.push_str(&x[x.find(">").unwrap()+1..x.rfind("<").unwrap()]);
 				} if x.starts_with("<params>") { continue; }
-				if x.starts_with("<param><value>") {
+				if x.contains("<value>") || x.starts_with("<param><value>") {
 					let mut mat = if ac_types.find(x).is_some() { ac_types.find(x).unwrap() } else { continue; };
 					let mut mat2 = if ac_endtypes.find(x).is_some() { ac_endtypes.find(x).unwrap() } else { continue; };
 					argv.push(String::from(&x[mat.end()..mat2.start()]));
 				}
 			}
-		} else { return (String::from("Invalid XML-RPC"),vec![String::from("Invalid XML-RPC")]); }	
-	} else { return (String::from("Invalid XML-RPC"),vec![String::from("Invalid XML-RPC")]); }
+		} else { return (String::from("Invalid XML-RPC, check server output"),vec![String::from("Invalid XML-RPC, check server output")]); }	
+	} else { return (String::from("Invalid XML-RPC, check server output"),vec![String::from("Invalid XML-RPC, check server output")]); }
 	(String::from(methodName),argv)
 }
 
