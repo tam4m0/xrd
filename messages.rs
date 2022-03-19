@@ -20,11 +20,9 @@ pub fn reverse_xmlrpc(message: String) -> (String,Vec<String>) {
 					methodName.push_str(&x[x.find(">").unwrap()+1..x.rfind("<").unwrap()]);
 				} if x.starts_with("<params>") { continue; }
 				if x.starts_with("<param><value>") {
-					if !x.contains("struct") {
-						let mat = ac_types.find(x).unwrap();
-						let mat2 = ac_endtypes.find(x).unwrap();
-						argv.push(String::from(&x[mat.end()..mat2.start()]));
-					}
+					let mut mat = if ac_types.find(x).is_some() { ac_types.find(x).unwrap() } else { continue; };
+					let mut mat2 = if ac_endtypes.find(x).is_some() { ac_endtypes.find(x).unwrap() } else { continue; };
+					argv.push(String::from(&x[mat.end()..mat2.start()]));
 				}
 			}
 		} else { return (String::from("Invalid XML-RPC"),vec![String::from("Invalid XML-RPC")]); }	
@@ -68,23 +66,28 @@ pub fn transform_xmlrpc(lang: String) -> String {
 }
 
 
-pub fn send_message(str: String, stream: Arc<Mutex<TcpStream>>, mut handler: u32) -> Result<(Arc<Mutex<TcpStream>>,u32),()> {
+pub fn send_message(str: String, stream: Arc<Mutex<TcpStream>>, mut handler: Arc<Mutex<u32>>) -> Result<(Arc<Mutex<TcpStream>>,Arc<Mutex<u32>>),()> {
 	let cloned_stream = Arc::clone(&stream);
-	let mut cloned_stream_unlocked = cloned_stream.lock().unwrap();
+	let mut cloned_streamu = cloned_stream.lock().unwrap();
+	let cloned_handler = Arc::clone(&handler);
+	let mut cloned_handleru = cloned_handler.lock().unwrap();
         let mut handler_bytes = [0;4];
 	let mut len_bytes = [0;4];
-        if handler + 1 == 0xFFFFFFFF { handler = 0x80000000; } else { handler += 1; }
-       	LittleEndian::write_u32(&mut handler_bytes, handler);
+        if *cloned_handleru + 1 == 0xFFFFFFFF { *cloned_handleru = 0x80000000; } else { *cloned_handleru += 1; }
+       	LittleEndian::write_u32(&mut handler_bytes, *cloned_handleru);
       	LittleEndian::write_u32(&mut len_bytes, *&str.as_bytes().len() as u32);
-	let a = cloned_stream_unlocked.write(&len_bytes);
-	let b = cloned_stream_unlocked.write(&handler_bytes);
-	let c = cloned_stream_unlocked.write(&str.as_bytes());
+	let a = cloned_streamu.write(&len_bytes);
+	let b = cloned_streamu.write(&handler_bytes);
+	let c = cloned_streamu.write(&str.as_bytes());
 	for x in [a,b,c].iter() {
 	        if !x.is_ok() {
 	                return Err(());
 	        }
 	}
-	drop(cloned_stream_unlocked);
+	drop(cloned_streamu);
+	drop(cloned_stream);
+	drop(cloned_handleru);
+	drop(cloned_handler);
 	Ok((stream,handler))
 }
 

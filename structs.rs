@@ -1,6 +1,8 @@
 extern crate serde;
 use serde_derive::*;
 
+pub fn nop() {}
+
 #[derive(Deserialize)]
 pub struct Config {
         pub main: Main,
@@ -19,5 +21,6 @@ pub struct Server {
         pub port: String,
         pub password: String,
 	pub admins: String,
+	pub trackspath: String,
 }
 
