@@ -1,21 +1,18 @@
-extern crate serde;
-use serde_derive::*;
-
 pub fn nop() {}
 
-#[derive(Deserialize)]
+#[derive(Debug,Clone,Default)]
 pub struct Config {
         pub main: Main,
-        pub server: Server,
+        pub servers: Vec<Server>,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug,Clone,Default)]
 pub struct Main {
         pub version: String,
 	pub prefix: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug,Clone,Default)]
 pub struct Server {
         pub host: String,
         pub port: String,
