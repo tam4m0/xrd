@@ -6,8 +6,8 @@ use std::str;
 use std::net::TcpStream;
 use std::sync::{Arc,Mutex};
 use aho_corasick::AhoCorasick;
+use walkdir::WalkDir;
 use crate::structs::*;
-use glob::glob;
 
 fn skipToChallenge(socket: Arc<Mutex<TcpStream>>, mut handler: Arc<Mutex<u32>>, argstr: String) -> Arc<Mutex<u32>> {
 	handler = messages::send_message(messages::transform_xmlrpc(format!("mc
@@ -93,20 +93,18 @@ paa va str {}",if x == "-1" { continue; } else { &x },user)),Arc::clone(&socket)
 	handler
 }
 
-fn chall_list(socket: Arc<Mutex<TcpStream>>, mut handler: Arc<Mutex<u32>>, server: &Server, user: String) -> Arc<Mutex<u32>> {
-	for e in glob(format!("{}/{}",server.trackspath,"*").as_str()).unwrap() {
-		if e.as_ref().unwrap().display().to_string().contains(".Gbx") {
-			handler = messages::send_message(messages::transform_xmlrpc(format!("mc
+fn chall_list(socket: Arc<Mutex<TcpStream>>, mut handler: Arc<Mutex<u32>>, user: String, config: &Server) -> Arc<Mutex<u32>> {
+	for e in WalkDir::new(&config.trackspath).follow_links(false).into_iter().filter_map(|x| x.ok()) {
+		handler = messages::send_message(messages::transform_xmlrpc(format!("mc
 mn ChatSendToLogin
 pa
 paa va str {}
-paa va str {}",&e.as_ref().unwrap().display().to_string().as_str()[e.as_ref().unwrap().display().to_string().rfind("/").unwrap()+1..].to_string(),user)),Arc::clone(&socket),Arc::clone(&handler)).unwrap().1
-		}
+paa va str {}",&format!("{:?}",e).as_str()[format!("{:?}",e).rfind("/").unwrap()+1..format!("{:?}",e).rfind("\")").unwrap()].to_string(),user)),Arc::clone(&socket),Arc::clone(&handler)).unwrap().1
 	}
 	handler
 }
 
-pub fn event((mut socket,mut handler): (Arc<Mutex<TcpStream>>,Arc<Mutex<u32>>), (main,server): (Main,Server)) {
+pub fn event((socket,mut handler): (Arc<Mutex<TcpStream>>,Arc<Mutex<u32>>), (main,server): (Main,Server)) {
 	let admins = server.admins.split("**").collect::<Vec<&str>>();
 	let ac_useractions = AhoCorasick::new_auto_configured(&["kick", "ban", "list"]);
 	let ac_challactions = AhoCorasick::new_auto_configured(&["skip","remove","insert","list"]);
@@ -115,7 +113,6 @@ pub fn event((mut socket,mut handler): (Arc<Mutex<TcpStream>>,Arc<Mutex<u32>>), 
 		let (meth_name, meth_argv) = messages::reverse_xmlrpc(&message);
 		if meth_name.starts_with("TrackMania.PlayerChat") {
 			if meth_argv[2].starts_with(&format!("{}{}",main.prefix,String::from("echo"))[..]) {
-				let cmd = &format!("{}{}",main.prefix,String::from("echo"));
 				let user = &meth_argv[1];
 				handler = messages::send_message(messages::transform_xmlrpc(format!("mc
 mn ChatSendToLogin
@@ -162,8 +159,6 @@ paa va str {}",user)),Arc::clone(&socket),Arc::clone(&handler)).unwrap().1;
 				let user = &meth_argv[1];
 				let argstr = &meth_argv[2].split(" ").collect::<Vec<&str>>()[1..];
 				if !argstr.is_empty() {
-					println!("{}",user);
-					println!("{:#?}",admins);
 					if admins.contains(&user.as_str()) {
 						if ac_challactions.is_match(argstr[0]) {
 							let mat = ac_challactions.find(argstr[0]).unwrap();
@@ -175,7 +170,7 @@ paa va str {}",format!("{}/{}",&server.trackspath,argstr[1..].join(" ")))),Arc::
 								_ if mat.pattern() == 2 => handler = messages::send_message(messages::transform_xmlrpc(format!("mc
 mn InsertChallenge
 paa va str {}",format!("{}/{}",&server.trackspath,argstr[1..].join(" ")))),Arc::clone(&socket),Arc::clone(&handler)).unwrap().1,
-								_ if mat.pattern() == 3 => handler = chall_list(Arc::clone(&socket),Arc::clone(&handler),&server,user.to_string()),
+								_ if mat.pattern() == 3 => handler = chall_list(Arc::clone(&socket),Arc::clone(&handler),user.to_string(),&server),
 								_ => nop(),
 							}
 						}

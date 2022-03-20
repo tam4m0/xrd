@@ -20,8 +20,8 @@ pub fn reverse_xmlrpc(message: &String) -> (String,Vec<String>) {
 					methodName.push_str(&x[x.find(">").unwrap()+1..x.rfind("<").unwrap()]);
 				} if x.starts_with("<params>") { continue; }
 				if x.contains("<value>") || x.starts_with("<param><value>") {
-					let mut mat = if ac_types.find(x).is_some() { ac_types.find(x).unwrap() } else { continue; };
-					let mut mat2 = if ac_endtypes.find(x).is_some() { ac_endtypes.find(x).unwrap() } else { continue; };
+					let mat = if ac_types.find(x).is_some() { ac_types.find(x).unwrap() } else { continue; };
+					let mat2 = if ac_endtypes.find(x).is_some() { ac_endtypes.find(x).unwrap() } else { continue; };
 					argv.push(String::from(&x[mat.end()..mat2.start()]));
 				}
 			}
@@ -66,7 +66,7 @@ pub fn transform_xmlrpc(lang: String) -> String {
 }
 
 
-pub fn send_message(str: String, stream: Arc<Mutex<TcpStream>>, mut handler: Arc<Mutex<u32>>) -> Result<(Arc<Mutex<TcpStream>>,Arc<Mutex<u32>>),()> {
+pub fn send_message(str: String, stream: Arc<Mutex<TcpStream>>, handler: Arc<Mutex<u32>>) -> Result<(Arc<Mutex<TcpStream>>,Arc<Mutex<u32>>),()> {
 	let cloned_stream = Arc::clone(&stream);
 	let mut cloned_streamu = cloned_stream.lock().unwrap();
 	let cloned_handler = Arc::clone(&handler);

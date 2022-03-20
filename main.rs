@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 #[macro_use]
 
 extern crate clone_all;
@@ -49,12 +50,11 @@ paa va bool true"#)),Arc::clone(&stream),Arc::clone(&handler)).unwrap().1;
 }
 
 fn parse_xrd(parse: PathBuf) -> structs::Config {
-	let mut fr = BufReader::new(File::open(&parse).expect("Couldn't open config"));
+	let fr = BufReader::new(File::open(&parse).expect("Couldn't open config"));
 	let ac_findvh = AhoCorasick::new_auto_configured(&["^^"]);
 	let ac_verbs = AhoCorasick::new_auto_configured(&["version","prefix","host","port","password","trackspath","admins","gametype"]);
 	let mut cnfroot = structs::Config::default();
 	let mut srvvec = Vec::new();
-	let mut buf = String::new();
 	let mut srvcount: u16 = 0;
 	for line in fr.lines() {
 		let lineu = line.unwrap();
@@ -111,6 +111,6 @@ xrd v{}"#,&cnfroot.main.version);
 			event(sockarray,(cnfroot.main,x));
 		}}));
 	} for x in handles {
-		x.join();
+		x.join().unwrap();
 	}
 }
