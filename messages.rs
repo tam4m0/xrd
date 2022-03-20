@@ -8,7 +8,7 @@ use aho_corasick::AhoCorasick;
 pub mod structs;
 
 pub fn reverse_xmlrpc(message: &String) -> (String,Vec<String>) {
-	let xmllist = message.split("\n").collect::<Vec<&str>>();
+	let xmllist = message.split('\n').collect::<Vec<&str>>();
 	let ac_types = AhoCorasick::new_auto_configured(&["<string>","<boolean>","<i4>","<struct>"]);
 	let ac_endtypes = AhoCorasick::new_auto_configured(&["</string>","</boolean>","</i4>","</struct>"]);
 	let mut methodName = String::new();
@@ -17,8 +17,8 @@ pub fn reverse_xmlrpc(message: &String) -> (String,Vec<String>) {
 		if xmllist[1].starts_with("<methodCall>") || xmllist[1].starts_with("<methodResponse>") {
 			for x in &xmllist[2..] {
 				if x.starts_with("<methodName>") {
-					methodName.push_str(&x[x.find(">").unwrap()+1..x.rfind("<").unwrap()]);
-				} if x.starts_with("<params>") { continue; }
+					methodName.push_str(&x[x.find('>').unwrap()+1..x.rfind('<').unwrap()]);
+				} else if x.starts_with("<params>") { continue; }
 				if x.contains("<value>") || x.starts_with("<param><value>") {
 					let mat = if ac_types.find(x).is_some() { ac_types.find(x).unwrap() } else { continue; };
 					let mat2 = if ac_endtypes.find(x).is_some() { ac_endtypes.find(x).unwrap() } else { continue; };
@@ -27,23 +27,23 @@ pub fn reverse_xmlrpc(message: &String) -> (String,Vec<String>) {
 			}
 		} else { return (String::from("Invalid XML-RPC, check server output"),vec![String::from("Invalid XML-RPC, check server output")]); }	
 	} else { return (String::from("Invalid XML-RPC, check server output"),vec![String::from("Invalid XML-RPC, check server output")]); }
-	(String::from(methodName),argv)
+	(methodName,argv)
 }
 
 pub fn transform_xmlrpc(lang: String) -> String {
-	let langlist = lang.split("\n").collect::<Vec<&str>>();
+	let langlist = lang.split('\n').collect::<Vec<&str>>();
 	let ac = AhoCorasick::new_auto_configured(&["str","bool","i4"]);
 	let mut langstr = String::new();
 	if langlist[0] == "mc" {
 		langstr.push_str("<methodCall>");
-		let methodName = langlist[1].split(" ").collect::<Vec<&str>>()[1];
+		let methodName = langlist[1].split(' ').collect::<Vec<&str>>()[1];
 		langstr.push_str(&format!("<methodName>{}</methodName>",methodName)[..]);
 		if langlist[2] == "pa" {
 			langstr.push_str("<params>");
 			let values = &langlist[3..];
 			let mut values_vec = Vec::new();
 			for x in values.iter() {
-				values_vec.push(x.split(" ").collect::<Vec<&str>>());
+				values_vec.push(x.split(' ').collect::<Vec<&str>>());
 			} for x in values_vec.iter() {
 				if &x[0..2] == vec!["paa","va"] {
 					langstr.push_str("<param><value>");
@@ -75,10 +75,10 @@ pub fn send_message(str: String, stream: Arc<Mutex<TcpStream>>, handler: Arc<Mut
 	let mut len_bytes = [0;4];
         if *cloned_handleru + 1 == 0xFFFFFFFF { *cloned_handleru = 0x80000000; } else { *cloned_handleru += 1; }
        	LittleEndian::write_u32(&mut handler_bytes, *cloned_handleru);
-      	LittleEndian::write_u32(&mut len_bytes, *&str.as_bytes().len() as u32);
+      	LittleEndian::write_u32(&mut len_bytes, str.as_bytes().len() as u32);
 	let a = cloned_streamu.write(&len_bytes);
 	let b = cloned_streamu.write(&handler_bytes);
-	let c = cloned_streamu.write(&str.as_bytes());
+	let c = cloned_streamu.write(str.as_bytes());
 	for x in [a,b,c].iter() {
 	        if !x.is_ok() {
 	                return Err(());
@@ -104,7 +104,7 @@ pub fn listen(socket: Arc<Mutex<TcpStream>>) -> String {
 		}
 		let str = &str::from_utf8(&buf).unwrap().trim_matches(char::from(0)).to_string()[..];
 		let xmlstart = str.find("<?xml");
-		if !xmlstart.is_some() { continue; }
+		if xmlstart.is_none() { continue; }
 		let str = str::from_utf8(&str.as_bytes()[xmlstart.unwrap() as usize..]);
 		drop(cloned_sock_unlocked);
 		return String::from(str.unwrap());

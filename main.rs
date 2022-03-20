@@ -4,16 +4,7 @@
 #[macro_use]
 
 extern crate clone_all;
-use std::net::TcpStream;
-use std::io::prelude::*;
-use std::io::BufReader;
-use std::sync::{Arc,Mutex};
-use std::fs::File;
-use std::str;
-use std::thread;
-use std::env;
-use std::usize;
-use std::path::PathBuf;
+use std::{net::TcpStream, io::{prelude::*, BufReader}, sync::{Arc,Mutex}, fs::File, str, env, usize, path::PathBuf};
 use aho_corasick::AhoCorasick;
 pub mod structs;
 pub mod messages;
@@ -52,7 +43,7 @@ paa va bool true"#)),Arc::clone(&stream),Arc::clone(&handler)).unwrap().1;
 fn parse_xrd(parse: PathBuf) -> structs::Config {
 	let fr = BufReader::new(File::open(&parse).expect("Couldn't open config"));
 	let ac_findvh = AhoCorasick::new_auto_configured(&["^^"]);
-	let ac_verbs = AhoCorasick::new_auto_configured(&["version","prefix","host","port","password","trackspath","admins","gametype"]);
+	let ac_verbs = AhoCorasick::new_auto_configured(&["version","prefix","host","port","password","trackspath","songspath","admins","gametype"]);
 	let mut cnfroot = structs::Config::default();
 	let mut srvvec = Vec::new();
 	let mut srvcount: u16 = 0;
@@ -62,18 +53,18 @@ fn parse_xrd(parse: PathBuf) -> structs::Config {
 			srvvec.push(structs::Server::default());
 			srvcount+=1;
 			continue;
-		} if ac_verbs.is_match(&lineu) {
+		} else if ac_verbs.is_match(&lineu) {
 			let mat = ac_verbs.find(&lineu).unwrap();
-			
 			match mat {
-				_ if mat.pattern() == 0 => cnfroot.main.version = (&lineu[..][&lineu.find("|").unwrap()+1..].to_string()).to_owned(),
-				_ if mat.pattern() == 1 => cnfroot.main.prefix = (&lineu[..][&lineu.find("|").unwrap()+1..].to_string()).to_owned(),
-				_ if mat.pattern() == 2 => if srvcount > 0 { srvvec[usize::from(srvcount-1)].host = (&lineu[..][&lineu.find("|").unwrap()+1..].to_string()).to_owned() } else { continue; },
-				_ if mat.pattern() == 3 => if srvcount > 0 { srvvec[usize::from(srvcount-1)].port = (&lineu[..][&lineu.find("|").unwrap()+1..].to_string()).to_owned() } else { continue; },
-				_ if mat.pattern() == 4 => if srvcount > 0 { srvvec[usize::from(srvcount-1)].password = (&lineu[..][&lineu.find("|").unwrap()+1..].to_string()).to_owned() } else { continue; },
-				_ if mat.pattern() == 5 => if srvcount > 0 { srvvec[usize::from(srvcount-1)].trackspath = (&lineu[..][&lineu.find("|").unwrap()+1..].to_string()).to_owned() } else { continue; },
-				_ if mat.pattern() == 6 => if srvcount > 0 { srvvec[usize::from(srvcount-1)].admins = (&lineu[..][&lineu.find("|").unwrap()+1..].to_string()).to_owned() } else { continue; },
-				_ if mat.pattern() == 7 => if srvcount > 0 { srvvec[usize::from(srvcount-1)].gametype = (&lineu[..][&lineu.find("|").unwrap()+1..].to_string()).to_owned() } else { continue; },
+				_ if mat.pattern() == 0 => cnfroot.main.version = (&lineu[..][&lineu.find('|').unwrap()+1..].to_string()).to_owned(),
+				_ if mat.pattern() == 1 => cnfroot.main.prefix = (&lineu[..][&lineu.find('|').unwrap()+1..].to_string()).to_owned(),
+				_ if mat.pattern() == 2 => if srvcount > 0 { srvvec[usize::from(srvcount-1)].host = (&lineu[..][&lineu.find('|').unwrap()+1..].to_string()).to_owned() } else { continue; },
+				_ if mat.pattern() == 3 => if srvcount > 0 { srvvec[usize::from(srvcount-1)].port = (&lineu[..][&lineu.find('|').unwrap()+1..].to_string()).to_owned() } else { continue; },
+				_ if mat.pattern() == 4 => if srvcount > 0 { srvvec[usize::from(srvcount-1)].password = (&lineu[..][&lineu.find('|').unwrap()+1..].to_string()).to_owned() } else { continue; },
+				_ if mat.pattern() == 5 => if srvcount > 0 { srvvec[usize::from(srvcount-1)].trackspath = (&lineu[..][&lineu.find('|').unwrap()+1..].to_string()).to_owned() } else { continue; },
+				_ if mat.pattern() == 6 => if srvcount > 0 { srvvec[usize::from(srvcount-1)].songspath = (&lineu[..][&lineu.find('|').unwrap()+1..].to_string()).to_owned() } else { continue; },
+				_ if mat.pattern() == 7 => if srvcount > 0 { srvvec[usize::from(srvcount-1)].admins = (&lineu[..][&lineu.find('|').unwrap()+1..].to_string()).to_owned() } else { continue; },
+				_ if mat.pattern() == 8 => if srvcount > 0 { srvvec[usize::from(srvcount-1)].gametype = (&lineu[..][&lineu.find('|').unwrap()+1..].to_string()).to_owned() } else { continue; },
 				_ => structs::nop(),
 			};
 		}
@@ -86,6 +77,7 @@ fn main() {
 	path.push(env::current_dir().expect("No cwd?"));
 	path.push("cnf.xrd");
 	let cnfroot = parse_xrd(path);
+	let version = format!("xrd v{}",&cnfroot.main.version);
 	let mut handles = Vec::new();
 	println!(r#"
         ..........             ..........       
@@ -104,13 +96,14 @@ fn main() {
       .,*(#%%%%%%%%/.       ,/%%%%%%%%%%#(,     
      ./((((((((((/,           ,/((((((((((/,    
 
-xrd v{}"#,&cnfroot.main.version);
+{}"#,&version);
 	for x in &cnfroot.servers {
-		let sockarray = connect_server(&x,0x80000000);
-		handles.push(thread::spawn({clone_all!(cnfroot, x); move || {
-			event(sockarray,(cnfroot.main,x));
+		handles.push(std::thread::spawn({clone_all!(cnfroot, x); move || { 
+			let sockarray = connect_server(&x,0x80000000);
+			event(sockarray,(&cnfroot.main,&x))
 		}}));
-	} for x in handles {
+	}
+	for x in handles {
 		x.join().unwrap();
 	}
 }
