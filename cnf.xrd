@@ -1,0 +1,18 @@
+version|0.2.0 'Cowboys from Hell'
+prefix|/
+
+^^
+host|127.0.0.1
+port|5002
+password|
+trackspath|
+admins|
+gametype|forever
+
+^^
+host|127.0.0.1
+port|5000
+password|
+trackspath|
+admins|
+gametype|nations
